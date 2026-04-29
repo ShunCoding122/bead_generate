@@ -41,3 +41,11 @@
 ## 部署（Vercel）
 - 配置环境变量 `ALLOWED_IPS`。
 - 部署后仅 allowlist IP 可访问。
+
+## 常见问题：上传后只有红字错误
+- 如果看到 `missing required columns`，说明旧版解析器未识别到类似 `HEX 值` / `RGB 值` / `名称` 这类中文表头。
+- 新版解析器会：
+  - 预扫描每个 sheet 前 8 行自动定位表头行；
+  - 表头归一化（去空格/下划线/连字符，忽略大小写）；
+  - 识别 `色号/编号/code`、`HEX 值/hex` 等别名。
+- 升级代码后请重新执行：`npm run convert:palette`，然后重启 `npm run dev`。
