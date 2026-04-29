@@ -1,11 +1,29 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+const getClientIp = (request: Request): string => {
+  const xff = request.headers.get('x-forwarded-for') || '';
+  const first = xff.split(',')[0]?.trim();
+  if (first) return first;
+  const realIp = request.headers.get('x-real-ip')?.trim();
+  return realIp || '';
+};
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
-  const allowed = (process.env.ALLOWED_IPS || '').split(',').map((x) => x.trim()).filter(Boolean);
-  const forwarded = req.headers['x-forwarded-for'];
-  const ip = Array.isArray(forwarded) ? forwarded[0] : String(forwarded || '').split(',')[0].trim();
-  if (allowed.length && !allowed.includes(ip)) {
-    return res.status(403).send('Forbidden');
+export default function middleware(request: Request): Response {
+  const allowed = (process.env.ALLOWED_IPS || '')
+    .split(',')
+    .map((ip) => ip.trim())
+    .filter(Boolean);
+
+  if (!allowed.length) {
+    return new Response('Forbidden: ALLOWED_IPS is empty', { status: 403 });
   }
-  return res.status(200).send('ok');
+
+  const ip = getClientIp(request);
+  if (!ip || !allowed.includes(ip)) {
+    return new Response('Forbidden', { status: 403 });
+  }
+
+  return fetch(request);
 }
+
+export const config = {
+  matcher: '/:path*',
+};
