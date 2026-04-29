@@ -6,10 +6,11 @@ const getClientIp = (request: Request): string => {
   return realIp || '';
 };
 
-export default function middleware(request: Request): Response {
-  const allowed = (process.env.ALLOWED_IPS || '')
+export default async function middleware(request: Request): Promise<Response> {
+  const allowedRaw = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.ALLOWED_IPS ?? '';
+  const allowed = allowedRaw
     .split(',')
-    .map((ip) => ip.trim())
+    .map((ip: string) => ip.trim())
     .filter(Boolean);
 
   if (!allowed.length) {
