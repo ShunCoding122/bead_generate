@@ -49,3 +49,8 @@
   - 表头归一化（去空格/下划线/连字符，忽略大小写）；
   - 识别 `色号/编号/code`、`HEX 值/hex` 等别名。
 - 升级代码后请重新执行：`npm run convert:palette`，然后重启 `npm run dev`。
+
+## Vercel 运行注意（middleware）
+- 本项目使用 Web 标准 `Request/Response` middleware，不使用 `@vercel/node` 的 `req/res` 处理器。
+- `ALLOWED_IPS` 为空时直接拒绝访问（403），请先在 Vercel Environment Variables 配置好再访问。
+- 配置变更后需 Redeploy。
